@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+<div class="users-page minimalist-users-page">
+    <h2 class="page-title minimalist-title">Manage Users</h2>
+
+    <div class="users-table-section minimalist-users-section">
+        <div class="users-table-header minimalist-users-header">
+            <button class="add-icon-btn minimalist-add-btn" onclick="openAddUserModal()" title="Add User">
+                +
+            </button>
+        </div>
+
+        <div class="users-table-wrap minimalist-users-table-wrap">
+            <table class="users-table minimalist-users-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>USERNAME</th>
+                        <th>ROLE</th>
+                        <th>CREATED AT</th>
+                        <th>ACTION</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>
+                            <span class="role-badge {{ user.role }}">{{ user.role|capitalize }}</span>
+                        </td>
+                        <td>{{ user.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        <td>
+                            {% if user.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}">
+                                <button
+                                    type="submit"
+                                    class="delete-btn minimalist-delete-btn"
+                                    onclick="return confirm('Delete this user?')">
+                                    Delete
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="current-admin-badge minimalist-current-admin-badge">Current Admin</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="addUserModal">
+    <div class="modal-box minimalist-modal-box">
+        <div class="modal-header minimalist-modal-header">
+            <h3>Add User</h3>
+            <button class="modal-close-btn" onclick="closeAddUserModal()">×</button>
+        </div>
+
+        <form method="POST" action="{{ url_for('add_user') }}" class="modal-form">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <select name="role" required>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+            </select>
+
+            <div class="modal-actions">
+                <button type="button" class="cancel-btn" onclick="closeAddUserModal()">Cancel</button>
+                <button type="submit" class="save-btn">Add User</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openAddUserModal() {
+    document.getElementById("addUserModal").classList.add("show");
+}
+
+function closeAddUserModal() {
+    document.getElementById("addUserModal").classList.remove("show");
+}
+
+window.addEventListener("click", function(e) {
+    const modal = document.getElementById("addUserModal");
+    if (e.target === modal) {
+        closeAddUserModal();
+    }
+});
+</script>
+{% endblock %}

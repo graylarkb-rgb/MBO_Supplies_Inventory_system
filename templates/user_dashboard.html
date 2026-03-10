@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}User Dashboard{% endblock %}
+
+{% block content %}
+
+<div class="inventory-page">
+    <h2 class="page-title minimalist-title">User Dashboard</h2>
+
+```
+<div class="inventory-table-section minimalist-inventory-section">
+
+    <!-- SEARCH BAR -->
+    <div style="display:flex; justify-content:flex-end; margin-bottom:10px; gap:8px;">
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search item..."
+            style="padding:6px 10px; font-family:'Courier New'; font-weight:bold; border:1px solid #ccc; border-radius:6px;"
+        >
+
+        <button onclick="searchTable()" class="table-action-btn">
+            Search
+        </button>
+
+        <button onclick="clearSearch()" class="table-action-btn" style="background:#999;">
+            Clear
+        </button>
+    </div>
+
+    <div class="inventory-table-wrap minimalist-inventory-table-wrap">
+        <table class="inventory-table minimalist-inventory-table" id="inventoryTable">
+            <thead>
+                <tr>
+                    <th>ITEM NAME</th>
+                    <th>CATEGORY</th>
+                    <th>QUANTITY</th>
+                    <th>STATUS</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.item_name }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.quantity }} </td>
+                    <td>
+                        {% if item.quantity <= threshold %}
+                            <span class="stock-badge low">Low Stock</span>
+                        {% else %}
+                            <span class="stock-badge ok">In Stock</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+
+</div>
+```
+
+</div>
+
+<script>
+function searchTable(){
+    const input = document.getElementById("searchInput").value.toLowerCase();
+    const rows = document.querySelectorAll("#inventoryTable tbody tr");
+
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(input) ? "" : "none";
+    });
+}
+
+function clearSearch(){
+    document.getElementById("searchInput").value = "";
+    const rows = document.querySelectorAll("#inventoryTable tbody tr");
+    rows.forEach(row => row.style.display = "");
+}
+</script>
+
+{% endblock %}
