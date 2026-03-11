@@ -15,14 +15,10 @@ login_manager.login_view = "login"
 
 LOW_STOCK_THRESHOLD = 5
 
-@app.route("/init-db")
-def init_db():
-    db.create_all()
-    return "Database initialized!"
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # =========================
@@ -105,6 +101,7 @@ def user_dashboard():
         items=items,
         threshold=LOW_STOCK_THRESHOLD
     )
+
 
 # =========================
 # MANAGE USERS
@@ -291,7 +288,6 @@ def move_stock(item_id):
         flash("Quantity must be greater than zero.", "danger")
         return redirect(url_for("inventory"))
 
-    # users can only decrease supplies
     if current_user.role == "user" and movement_type != "OUT":
         flash("Users can only decrease supplies.", "danger")
         return redirect(url_for("inventory"))
@@ -327,25 +323,7 @@ def move_stock(item_id):
     return redirect(url_for("inventory"))
 
 
-# =========================
-# CREATE DEFAULT ADMIN
-# =========================
-@app.route("/create-admin")
-def create_admin():
-    admin = User.query.filter_by(username="admin").first()
-    if not admin:
-        new_admin = User(
-            username="admin",
-            password_hash=generate_password_hash("admin123"),
-            role="admin"
-        )
-        db.session.add(new_admin)
-        db.session.commit()
-        return "Default admin created. Username: admin / Password: admin123"
-    return "Admin already exists."
-
-
 if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run()
