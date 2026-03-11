@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,6 +15,32 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 
 LOW_STOCK_THRESHOLD = 5
+
+
+def initialize_database():
+    with app.app_context():
+        db.create_all()
+
+        bootstrap_admin = os.getenv("BOOTSTRAP_ADMIN", "false").lower() == "true"
+        admin_username = os.getenv("ADMIN_USERNAME", "admin")
+        admin_password = os.getenv("ADMIN_PASSWORD", "admin123")
+
+        if bootstrap_admin:
+            existing_admin = User.query.filter_by(username=admin_username).first()
+            if not existing_admin:
+                new_admin = User(
+                    username=admin_username,
+                    password_hash=generate_password_hash(admin_password),
+                    role="admin"
+                )
+                db.session.add(new_admin)
+                db.session.commit()
+                print("Default admin created successfully.")
+            else:
+                print("Admin already exists.")
+
+
+initialize_database()
 
 
 @login_manager.user_loader
@@ -324,6 +351,4 @@ def move_stock(item_id):
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
     app.run()
